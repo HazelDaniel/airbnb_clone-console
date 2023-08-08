@@ -5,13 +5,31 @@ import uuid
 """ the module that defines the base model class """
 
 
+def is_uuid_valid(uuid_string):
+    """a function that checks if a uuid is valid"""
+    try:
+        uuid_obj = uuid.UUID(uuid_string)
+        return str(uuid_obj) == uuid_string
+    except ValueError:
+        return False
+
+
 class BaseModel:
     """a class that defines a base model"""
-    def __init__(self):
+    def __init__(self, *_, **kwargs):
         """the constructor function"""
-        self.id = str(uuid.uuid4())
-        self.created_at = datetime.datetime.now()
-        self.updated_at = self.created_at
+        if (kwargs and kwargs.items()):
+            create_value = kwargs.__getitem__("created_at")
+            create_id = kwargs.__getitem__("id")
+            if (is_uuid_valid(create_id)):
+                self.id = create_id
+            if (create_value and type(create_value) == str):
+                self.created_at = datetime.datetime.fromisoformat(create_value)
+            self.updated_at = self.created_at
+        else:
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.datetime.now()
+            self.updated_at = self.created_at
 
     def save(self):
         """a public instance method that updates the
